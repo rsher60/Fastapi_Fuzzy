@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  fuzzy_web:
+    build: .
+    command: sh -c "uvicorn main:app --reload --port=8000 --host=0.0.0.0"
+    ports:
+      - "8000:8000"
+    expose:
+      - "8000"
+    networks:
+      - practice
+    depends_on:
+      - db
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s # default
+        max_attempts: 5
+    volumes:
+      - .:/usr/src/app
+    working_dir: /usr/src/app
+  db:
+    image: postgres:12.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=test123
+      - POSTGRES_DB=fuzzyappdatabase
+      - POSTGRES_PORT=5880
+    expose:
+      - "5880"
+    ports:
+      - "5880:5880"
+    command: -p 5880
+    networks:
+      - practice
+
+volumes:
+  postgres_data:
+
+networks:
+  practice:

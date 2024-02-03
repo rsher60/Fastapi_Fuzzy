@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<head xmlns="http://www.w3.org/1999/html">
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1> Fuzzy matching Results </h1>
+    <table>
+        <thead>
+
+           <tr>
+                {% for key, value in result.items() %}
+                <th> {{ key }} </th>
+                <td> {{ value }} </td>
+           </tr>
+                {% endfor %}
+        </thead>
+    </table>
+<tbody> </tbody>
+</table>
+</body>
