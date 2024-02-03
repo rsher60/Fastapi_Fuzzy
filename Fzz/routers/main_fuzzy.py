@@ -50,6 +50,14 @@ db_dependency = Annotated[Session, Depends(get_db)]
 # print(db_dependency.query(country).all())
 # commented for trial
 
+
+
+@router.get("/form", response_class=HTMLResponse)
+def form_post(request: Request):
+    result = "Type a number"
+    return templates.TemplateResponse('form.html', context={'request': request, 'result': result})
+
+
 @router.get("/test/{user_name}", response_class=HTMLResponse)
 async def test(request: Request , user_name:str):
     return templates.TemplateResponse("home.html" , {"request":request , "username": user_name})

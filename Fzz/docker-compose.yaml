@@ -18,8 +18,8 @@ services:
         delay: 5s # default
         max_attempts: 5
     volumes:
-      - .:/usr/src/app
-    working_dir: /usr/src/app
+      - .:/app
+    working_dir: /app
   db:
     image: postgres:12.0-alpine
     volumes:
