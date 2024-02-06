@@ -74,7 +74,7 @@ async def read_all(request: Request ,db: Annotated[Session, Depends(get_db)]):
     output_df = a.fuzzy_merge()
     #output = output_df[['ACCOUNT_NAME', 'Match1_Ratio']]
     output = dict(zip(output_df['ACCOUNT_NAME'], output_df['Match1_Ratio']))
-    return templates.TemplateResponse("home.html" , context={'request': request, 'result': output})
+    return templates.TemplateResponse("fuzzy.html" , context={'request': request, 'result': output})
 
 
 
