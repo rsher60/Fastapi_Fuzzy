@@ -1,8 +1,8 @@
 from typing import Annotated
 from pydantic import BaseModel, Field
-
+from io import BytesIO
 from sqlalchemy.orm import Session
-from fastapi import FastAPI, Depends, HTTPException, status, Path , APIRouter , Request
+from fastapi import FastAPI, Depends, HTTPException, status, Path , APIRouter , Request , File, UploadFile
 import pandas as pd
 from models import country, matchbase, srilankainput
 #from datab import engine, SessionLocal
@@ -83,6 +83,21 @@ async def read_countries(db: db_dependency):
     countries = db.query(country).all()
     return {country.name for country in countries}
 
+
+@router.post("/predict_file")
+async def create_upload_file(file:UploadFile,db: Annotated[Session, Depends(get_db)]):
+    df_q2_srilanka = pd.read_csv(file.file)
+
+    compare_df_sri_lanka = pd.read_sql_query(db.query(matchbase).statement, con=engine)
+
+    a = Lead_fuzzymatch('SRI LANKA', 10, 5, df_q2_srilanka, compare_df_sri_lanka)
+    output_df = a.fuzzy_merge()
+    #output = output_df[['ACCOUNT_NAME', 'Match1_Ratio']]
+    output = dict(zip(output_df['ACCOUNT_NAME'], output_df['Match1_Ratio']))
+    return { 'result': output}
+
+    file.file.close()
+    return {"filename": file.filename}
 
 """
 @app.get("/country/{country_name}", status_code=status.HTTP_200_OK)
