@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-conn = sqlite3.connect('country.db')
+conn = sqlite3.connect('dbfiles/country.db')
 cur = conn.cursor()
 
 with open('data/match_base_data.csv') as f:

@@ -2,14 +2,17 @@ from typing import Annotated
 from pydantic import BaseModel, Field
 from io import BytesIO
 from sqlalchemy.orm import Session
-from fastapi import FastAPI, Depends, HTTPException, status, Path , APIRouter , Request , File, UploadFile
+from fastapi import FastAPI, Depends, HTTPException, status, Path , APIRouter , Request , File, UploadFile ,Body , Form
 import pandas as pd
-from models import country, matchbase, srilankainput
+from models import country, matchbase, srilankainput , AwesomeForm
 #from datab import engine, SessionLocal
 from datab import engine, SessionLocal
 from fuzzy_matcher import Lead_fuzzymatch
 from fastapi.responses import  HTMLResponse
 from fastapi.templating import  Jinja2Templates
+import json
+import csv
+import codecs
 
 # depends : Dependency injection
 router = APIRouter()
@@ -44,23 +47,7 @@ def get_db():
 db_dependency = Annotated[Session, Depends(get_db)]
 
 
-# print(db_dependency.query(matchbase).all())
 
-
-# print(db_dependency.query(country).all())
-# commented for trial
-
-
-
-@router.get("/form", response_class=HTMLResponse)
-def form_post(request: Request):
-    result = "Type a number"
-    return templates.TemplateResponse('form.html', context={'request': request, 'result': result})
-
-
-@router.get("/test/{user_name}", response_class=HTMLResponse)
-async def test(request: Request , user_name:str):
-    return templates.TemplateResponse("home.html" , {"request":request , "username": user_name})
 
 
 @router.get("/fuzzy", response_class=HTMLResponse)
@@ -78,15 +65,26 @@ async def read_all(request: Request ,db: Annotated[Session, Depends(get_db)]):
 
 
 
+
+
+
+
 @router.get("/country")
 async def read_countries(db: db_dependency):
     countries = db.query(country).all()
     return {country.name for country in countries}
 
 
-@router.post("/predict_file")
-async def create_upload_file(file:UploadFile,db: Annotated[Session, Depends(get_db)]):
-    df_q2_srilanka = pd.read_csv(file.file)
+
+@router.get("/upload_file", response_class=HTMLResponse)
+def form_post(request: Request):
+    result = "Type a number"
+    return templates.TemplateResponse('form.html', context={'request': request, 'result': result})
+
+
+@router.post("/predict_file",response_class=HTMLResponse)
+async def create_upload_file(request: Request ,fuzzy_file:UploadFile,db: Annotated[Session, Depends(get_db)]):
+    df_q2_srilanka = pd.read_csv(fuzzy_file.file)
 
     compare_df_sri_lanka = pd.read_sql_query(db.query(matchbase).statement, con=engine)
 
@@ -94,21 +92,30 @@ async def create_upload_file(file:UploadFile,db: Annotated[Session, Depends(get_
     output_df = a.fuzzy_merge()
     #output = output_df[['ACCOUNT_NAME', 'Match1_Ratio']]
     output = dict(zip(output_df['ACCOUNT_NAME'], output_df['Match1_Ratio']))
-    return { 'result': output}
+    #return templates.TemplateResponse("fuzzy.html", context={'request': request, 'result': output})
+    #return output
 
-    file.file.close()
-    return {"filename": file.filename}
+    #file.file.close()
+    return templates.TemplateResponse("fuzzy.html", context={'request': request, 'result': output})
 
-"""
-@app.get("/country/{country_name}", status_code=status.HTTP_200_OK)
+
+@router.post("/endpoint")
+async def upload_file(file: UploadFile):  # Optional data model
+    # Process uploaded file and data (if provided)
+    # ...
+    return {"message": f"{file.filename} uploaded successfully"}
+
+@router.get("/country/{country_name}", status_code=status.HTTP_200_OK)
 async def read_todo(db: db_dependency, country_name: str):
     # add the first to optimise the query as we dont know how many id's exist
     country_model = db.query(country).filter(country.name == country_name.upper()).first()
     if country_model is not None:
         return country_model
     raise HTTPException(status_code=404, detail='Country not found in the database')
+"""
 
-@app.get("/fuzzy_match" , status_code=status.HTTP_200_OK)
+
+@router.get("/fuzzy_match" , status_code=status.HTTP_200_OK)
 async def get_fuzzy(db: db_dependency, country_name: str):
      = pd.read_sql_query(db.query(matchbase).all())
 

@@ -1,5 +1,7 @@
 from datab import Base
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from fastapi import Request, UploadFile , Form
+from pydantic import BaseModel
 
 
 class country(Base):
@@ -50,3 +52,12 @@ class srilankainput(Base):
     PARTNER_COUNTRY = Column(Integer)
     ORIGINAL_LV_000 = Column(Integer)
     REPORTED_LV_000 = Column(Integer)
+
+
+
+class AwesomeForm(BaseModel):
+    file:UploadFile
+
+    @classmethod
+    def as_form(cls,file:UploadFile):
+        return cls(file=file)

@@ -5,8 +5,9 @@
     <title>Sample trial Form</title>
 </head>
 <body>
-<form method="post">
-    <input type="number" name="num" value="1234"/>
+<form action="/predict_file" method="POST" enctype="multipart/form-data">
+    <input type="text" name="file_upload" >
+    <input type="file" name="fuzzy_file">
     <input type="submit">
 </form>
 
